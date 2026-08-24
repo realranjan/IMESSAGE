@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 import fs from "fs";
 import https from "https";
 import { connectDB } from "./lib/db.js";
-import { clerkMiddleware, clerkWebhook } from "@clerk/express";
+import { clerkMiddleware } from "@clerk/express";
 import cors from "cors";
 import path from "path";
 import clerkWebhook from "./webhooks/clerk.webhook.js";
@@ -17,7 +17,7 @@ const FRONTEND_URL = process.env.FRONTEND_URL;
 const publicDir = path.join(process.cwd(), "public");
 // so that the data remain s in raw foramt not parsed
 app.use(
-  "api/webhooks/clerk",
+  "/api/webhooks/clerk",
   express.raw({ type: "application/json" }),
   clerkWebhook,
 );

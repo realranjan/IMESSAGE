@@ -3,10 +3,10 @@ import User from "../models/user.model.js";
 import { verifyWebhook } from "@clerk/backend/webhooks";
 import dotenv from "dotenv";
 
-const router = express.Router();
+const clerkWebhook = express.Router();
 dotenv.config();
 // we check if the req coming has signinf secret or not
-router.post("/", async (req, res) => {
+clerkWebhook.post("/", async (req, res) => {
   try {
     const signingsecret = process.env.CLERK_WEBHOOK_SIGNING_SECRET;
     if (!signingsecret) {
@@ -28,7 +28,7 @@ router.post("/", async (req, res) => {
     //handle error if the sig is wrong
 
     // adn then get the data here after verifying all the dat is returned in evt
-    const evt = await verifyWebhook(request, { signingsecret });
+    const evt = await verifyWebhook(request, { signingSecret: signingsecret });
 
     if (evt.type === "user.created" || evt.type === "user.updated") {
       const u = evt.data;
@@ -61,5 +61,4 @@ router.post("/", async (req, res) => {
     res.status(400).json({ message: "Webhook verification failed" });
   }
 });
-
-export default router;
+export default clerkWebhook;
