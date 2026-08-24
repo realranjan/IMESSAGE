@@ -6,6 +6,7 @@ import { connectDB } from "./lib/db.js";
 import { clerkMiddleware } from "@clerk/express";
 import cors from "cors";
 import path from "path";
+import job from "./lib/cron.js";
 dotenv.config();
 
 const app = express();
@@ -27,7 +28,7 @@ app.get("/health", (req, res) => {
 if (fs.existsSync(publicDir)) {
   app.use(express.static(publicDir));
 
-  app.get("/{*any}", (req, res, next) => {
+  app.get("*", (req, res, next) => {
     res.sendFile(path.join(publicDir, "index.html"), (err) => next(err));
   });
 }
@@ -43,6 +44,10 @@ connectDB()
   .then(() => {
     app.listen(port, () => {
       console.log(`✅ HTTP Express server running at http://localhost:${port}`);
+
+      if (process.env.NODE_ENV === "production") {
+        return job.start();
+      }
     });
   })
   .catch((err) => {
