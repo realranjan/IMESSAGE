@@ -3,9 +3,10 @@ import dotenv from "dotenv";
 import fs from "fs";
 import https from "https";
 import { connectDB } from "./lib/db.js";
-import { clerkMiddleware,clerkWebhook } from "@clerk/express";
+import { clerkMiddleware, clerkWebhook } from "@clerk/express";
 import cors from "cors";
 import path from "path";
+import clerkWebhook from "./webhooks/clerk.webhook.js";
 import job from "./lib/cron.js";
 dotenv.config();
 
