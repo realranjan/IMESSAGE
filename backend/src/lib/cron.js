@@ -3,7 +3,7 @@ import http from "node:https";
 import https from "node:https";
 
 // /14 every 14 minutes ,14 evry 14 min in hour
-const job = new CronJob("*/14****", function () {
+const job = new CronJob("*/14 * * * *", function () {
   const base = process.env.FRONTEND_URL;
   if (!base) {
     return;
