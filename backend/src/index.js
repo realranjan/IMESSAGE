@@ -11,9 +11,9 @@ import messageRoutes from "./routes/message.routes.js";
 import clerkWebhook from "./webhooks/clerk.webhook.js";
 
 import job from "./lib/cron.js";
+import { app, server } from "./lib/socket.js";
 dotenv.config();
 
-const app = express();
 const port = process.env.PORT || 3000;
 const FRONTEND_URL = process.env.FRONTEND_URL;
 
@@ -56,7 +56,7 @@ if (fs.existsSync(publicDir)) {
 // Connect DB first, then start HTTPS server
 connectDB()
   .then(() => {
-    app.listen(port, () => {
+    server.listen(port, () => {
       console.log(`✅ HTTP Express server running at http://localhost:${port}`);
 
       if (process.env.NODE_ENV === "production") {

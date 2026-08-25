@@ -1,5 +1,6 @@
 import User from "../models/user.model.js";
 import { upload } from "../middleware/upload.middleware.js";
+import { getReceiverSocketId } from "../lib/socket.js";
 import { hasImageKitConfig, uploadChatMedia } from "../lib/imagekit.js";
 import Message from "../models/message.model.js";
 export async function getUSersForSidebar(req, res) {
@@ -114,8 +115,13 @@ export async function sendMessage(req, res) {
         });
         await newMessage.save();
         //to view the message whch was created we jave to rfresh it hence we will impleent it using socket io relatime talking mesaging here
-
+        //
+        const receiverSocketId = getReceiverSocketId();
         //res.status(201).json(newMessage);
+        //only send data if user is online
+        if (receiverSocketId) {
+          io.to(receiverSocketId).emit("newMessage", newMessage);
+        }
       }
     }
   } catch (error) {
