@@ -14,13 +14,13 @@ const job = new CronJob("*/14 * * * *", function () {
   client
     .get(url, (res) => {
       if (res.statusCode === 200) {
-        return console.log("GET REQUEST SENT SUCCESSFULLY");
+        return console.log("GET REQUEST SENT CRON SUCCESSFULLY");
       } else {
-        return console.log("GET REQUEST FAILED", res.statusCode);
+        return console.log("GET REQUEST CRON FAILED", res.statusCode);
       }
     })
     .on("error", (e) => {
-      return console.error("ERROR WHILE SENDING REQUEST", e);
+      return console.error("ERROR WHILE SENDING REQUEST CRON", e);
     });
 });
 
