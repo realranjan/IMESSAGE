@@ -72,10 +72,14 @@ export async function getMessages(req, res) {
     const { id: userToChatId } = req.params;
     const myId = req.user._id;
 
+    // Fix Mongoose $or string-casting failure by explicitly casting the route parameter
+    const mongoose = (await import("mongoose")).default;
+    const targetId = new mongoose.Types.ObjectId(userToChatId);
+
     const messages = await Message.find({
       $or: [
-        { senderId: myId, receiverId: userToChatId },
-        { senderId: userToChatId, receiverId: myId },
+        { senderId: myId, receiverId: targetId },
+        { senderId: targetId, receiverId: myId },
       ],
     }).sort({ createdAt: 1 });
     res.status(200).json(messages);
