@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { frameStyleFromUrl, getWallpaperById } from "../data/wallpapers";
-import { WallpaperContext } from "./wallpaper.js";
+import { WallpaperContext } from "./wallpaper";
 
 const STORAGE_KEY = "chat-wallpaper-id";
 
@@ -27,9 +27,7 @@ export function WallpaperProvider({ children }) {
   const frameStyle = frameStyleFromUrl(wallpaper.url);
 
   return (
-    <WallpaperContext.Provider
-      value={{ wallpaperId, setWallpaperId, wallpaper, frameStyle }}
-    >
+    <WallpaperContext.Provider value={{ wallpaperId, setWallpaperId, wallpaper, frameStyle }}>
       {children}
     </WallpaperContext.Provider>
   );
