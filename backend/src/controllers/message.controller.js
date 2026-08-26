@@ -1,6 +1,6 @@
 import User from "../models/user.model.js";
 import { upload } from "../middleware/upload.middleware.js";
-import { getReceiverSocketId } from "../lib/socket.js";
+import { io, getReceiverSocketId } from "../lib/socket.js";
 import { hasImageKitConfig, uploadChatMedia } from "../lib/imagekit.js";
 import Message from "../models/message.model.js";
 export async function getUSersForSidebar(req, res) {
@@ -74,8 +74,8 @@ export async function getMessages(req, res) {
 
     const messages = await Message.find({
       $or: [
-        { $senderId: myId, $receiverId: userToChatId },
-        { $senderId: userToChatId, $receiverId: myId },
+        { senderId: myId, receiverId: userToChatId },
+        { senderId: userToChatId, receiverId: myId },
       ],
     }).sort({ createdAt: 1 });
     res.status(200).json(messages);
@@ -89,7 +89,7 @@ export async function sendMessage(req, res) {
   try {
     const { text } = req.body;
     const { id: receiverId } = req.params;
-    const { senderId } = req.user._id;
+    const senderId = req.user._id;
     //case 1
     let imageUrl; // null values
     let videoUrl;
@@ -98,32 +98,36 @@ export async function sendMessage(req, res) {
         return res
           .status(500)
           .json({ message: "media upload is not configured" });
+      }
 
-        const url = await uploadChatMedia(req.file);
-        if (req.file.mimetype.startsWith("video/")) {
-          videourl = url;
-        } else {
-          imageUrl = url;
-        }
-
-        const newMessage = new Message({
-          senderId: senderId,
-          receiverId: receiverId,
-          text: text,
-          image: imageUrl,
-          video: videoUrl,
-        });
-        await newMessage.save();
-        //to view the message whch was created we jave to rfresh it hence we will impleent it using socket io relatime talking mesaging here
-        //
-        const receiverSocketId = getReceiverSocketId();
-        //res.status(201).json(newMessage);
-        //only send data if user is online
-        if (receiverSocketId) {
-          io.to(receiverSocketId).emit("newMessage", newMessage);
-        }
+      const url = await uploadChatMedia(req.file);
+      if (req.file.mimetype.startsWith("video/")) {
+        videoUrl = url;
+      } else {
+        imageUrl = url;
       }
     }
+
+    const newMessage = new Message({
+      senderId: senderId,
+      receiverId: receiverId,
+      text: text,
+      image: imageUrl,
+      video: videoUrl,
+    });
+    
+    await newMessage.save();
+    
+    //to view the message whch was created we jave to rfresh it hence we will impleent it using socket io relatime talking mesaging here
+    //
+    const receiverSocketId = getReceiverSocketId(receiverId);
+    
+    //only send data if user is online
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("newMessage", newMessage);
+    }
+    
+    res.status(201).json(newMessage);
   } catch (error) {
     console.error("Error in getconversationsfor dide bar ".error.message);
     res.status(500).json({ message: "Internal server error" });
