@@ -104,8 +104,18 @@ export const useChatStore = create(
           // Play sound notification if enabled
           const { isSoundEnabled } = get();
           if (isSoundEnabled) {
-            const audio = new window.Audio("/sounds/newmessage.mp3");
+            // Found existing sound file instead of newmessage.mp3
+            const audio = new window.Audio("/sounds/keystroke1.mp3");
             audio.play().catch(console.error);
+          }
+
+          // Show browser notification if we're not actively in chat with them
+          const currentPath = window.location.pathname;
+          if (Notification.permission === "granted" && String(newMessage.senderId) !== String(get().activeConversationId)) {
+             new Notification("New Message", {
+                body: newMessage.text || "Someone sent you a media message",
+                icon: "/logo.png"
+             });
           }
 
           // ALWAYS update the sidebar conversations to bump the sender to the top

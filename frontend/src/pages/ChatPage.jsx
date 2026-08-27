@@ -19,14 +19,20 @@ function ChatPage() {
   const { activeConversation, activeConversationId, isLargeScreen } = useSelectedConversation();
 
   useEffect(() => {
+    if ("Notification" in window && window.Notification.permission === "default") {
+      window.Notification.requestPermission();
+    }
+  }, []);
+
+  useEffect(() => {
     getUsers();
     getConversations();
   }, [getConversations, getUsers]);
 
   useEffect(() => {
-    if (!activeConversationId) return;
-
-    getMessages(activeConversationId);
+    if (activeConversationId) {
+      getMessages(activeConversationId);
+    }
     subscribeToMessages(activeConversationId);
 
     // cleanup
