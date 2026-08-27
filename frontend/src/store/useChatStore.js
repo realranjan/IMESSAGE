@@ -145,7 +145,7 @@ export const useChatStore = create(
             state.users.find((user) => user._id === activeConversationId) ||
             state.conversations.find((user) => user._id === activeConversationId) ||
             null,
-          messages: activeConversationId ? state.messages : [],
+          messages: [], // CLEAR messages immediately so they don't bleed into the next chat before API resolves!
         }));
         if (activeConversationId) {
           get().markMessagesAsRead(activeConversationId);
