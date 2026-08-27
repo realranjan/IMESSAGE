@@ -11,7 +11,7 @@ const io = new Server(server, { cors: { origin: [allowedOrigin] } });
 
 const userSocketMap = {}; // {userId: [socketId1, socketId2]}
 
-export function getReceiverSocketId(userId) {
+function getReceiverSocketId(userId) {
   return userSocketMap[userId]; // now returns an array of socket ids
 }
 
