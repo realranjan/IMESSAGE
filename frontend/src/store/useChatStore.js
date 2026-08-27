@@ -139,6 +139,10 @@ export const useChatStore = create(
       setSelectedUser: (selectedUser) => set({ selectedUser }),
 
       setActiveConversationId: (activeConversationId) => {
+        // Request notification permission natively on user click gesture!
+        if (typeof window !== "undefined" && "Notification" in window && window.Notification.permission === "default") {
+          window.Notification.requestPermission();
+        }
         set((state) => ({
           activeConversationId,
           selectedUser:
