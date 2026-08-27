@@ -55,15 +55,15 @@ export async function getConversationsForSidebar(req, res) {
         },
       },
       //5.pull that profile make it document from array
-      { $replaceRoot: { newRoot: { $first: "user" } } },
+      { $replaceRoot: { newRoot: { $first: "$user" } } },
       //6.hode the private clerkid from result
       { $project: { clerkId: 0 } },
     ]);
 
     res.status(200).json(conversations);
   } catch (error) {
-    console.error("Error in getconversationsfor dide bar ".error.message);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Error in getConversationsForSidebar", error);
+    res.status(500).json({ message: "Internal server error", error: error.message });
   }
 }
 
@@ -84,8 +84,8 @@ export async function getMessages(req, res) {
     }).sort({ createdAt: 1 });
     res.status(200).json(messages);
   } catch (error) {
-    console.error("Error in getconversationsfor dide bar ".error.message);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Error in getMessages", error);
+    res.status(500).json({ message: "Internal server error", error: error.message });
   }
 }
 
@@ -133,7 +133,7 @@ export async function sendMessage(req, res) {
     
     res.status(201).json(newMessage);
   } catch (error) {
-    console.error("Error in getconversationsfor dide bar ".error.message);
-    res.status(500).json({ message: "Internal server error" });
+    console.error("Error in sendMessage", error);
+    res.status(500).json({ message: "Internal server error", error: error.message });
   }
 }
