@@ -96,8 +96,6 @@ export const useChatStore = create(
       },
 
       subscribeToMessages: (userId) => {
-        if (!userId) return;
-
         const socket = useAuthStore.getState().socket;
         if (!socket) return;
 
