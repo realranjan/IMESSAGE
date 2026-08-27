@@ -14,8 +14,8 @@ const imagekit = new ImageKit({
 
 async function testUpload() {
   try {
-    const result = await imagekit.upload({
-      file: Buffer.from("hello world test"),
+    const result = await imagekit.files.upload({
+      file: Buffer.from("hello world test").toString("base64"),
       fileName: `test-${Date.now()}.txt`,
       folder: "/chat",
     });

@@ -19,7 +19,7 @@ async function uploadChatMedia(file) {
   const fileName = createFileName(file.originalname);
 
   const result = await imagekit.files.upload({
-    file: file.buffer,
+    file: file.buffer.toString("base64"),
     fileName,
     folder: "/chat",
   });
