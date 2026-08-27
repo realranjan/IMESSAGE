@@ -51,12 +51,21 @@ async function test() {
           },
         },
         //5.pull that profile make it document from array
-        { $replaceRoot: { newRoot: { $first: "$user" } } },
+        { 
+          $replaceRoot: { 
+            newRoot: { 
+              $mergeObjects: [{ $first: "$user" }, { unreadCount: "$unreadCount" }] 
+            } 
+          } 
+        },
         //6.hode the private clerkid from result
         { $project: { clerkId: 0 } },
       ]);
       console.log("Conversations:", conversations.length);
       console.log(conversations);
+      
+      const unread = await Message.find({ receiverId: loggedInUserId, isRead: false });
+      console.log("Actual Unread docs in DB:", unread.length);
   } catch (err) {
       console.error(err);
   }
