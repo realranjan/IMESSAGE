@@ -4,6 +4,24 @@ A full-stack, real-time messaging application designed to replicate the sleek ae
 
 ## 🏗️ Architecture & Tech Stack
 
+```mermaid
+graph TD
+    Client[React Client / Vite]
+    Auth[Clerk Authentication]
+    CDN[ImageKit CDN]
+    Server[Node.js Express API]
+    DB[(MongoDB Cluster)]
+    Sockets((Socket.io Engine))
+
+    Client -- HTTP Requests --> Server
+    Client -- WebSocket Sync --> Sockets
+    Client -- Bearer Tokens --> Auth
+    Server -- Reads/Writes --> DB
+    Server -- Emits Events --> Sockets
+    Server -- Uploads Media --> CDN
+    CDN -- Serves Images --> Client
+```
+
 This project is structured as a mono-repository containing two distinct applications: a React frontend and a Node.js API backend.
 
 ### **Frontend** (`/frontend`)
@@ -57,6 +75,26 @@ IMESSAGE/
 ## ⚡ Core Features & Lifecycle
 
 ### **1. Real-Time Socket Architecture**
+
+```mermaid
+sequenceDiagram
+    actor Sender
+    participant React as React UI (Zustand)
+    participant API as Express API
+    participant Mongo as MongoDB
+    participant Socket as Socket.io Map
+    actor Receiver as Receiver (All Open Devices)
+
+    Sender->>React: Sends text/image
+    React->>API: POST /messages/send
+    API->>Mongo: Store { senderId, receiverId, payload }
+    Mongo-->>API: Document created with timestamps
+    API->>Socket: Iterates userSocketMap[receiverId]
+    Socket-->>Receiver: io.to(device).emit('newMessage')
+    API-->>React: 201 Created (Sync Local State)
+    Receiver->>Receiver: Trigger Notification / Audio
+```
+
 Whenever a user logs in, the backend authorizes the socket connection and registers the user's `socket.id` into an array-based `userSocketMap`. This sophisticated approach natively supports **Multi-Device Synchronization**, allowing a single user to chat simultaneously from their desktop and mobile seamlessly without dropped events.
 
 ### **2. Advanced Message Rendering**
