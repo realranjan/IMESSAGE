@@ -9,25 +9,33 @@ const server = http.createServer(app);
 const io = new Server(server, { cors: { origin: [allowedOrigin] } });
 // makea  server htpp with both socket and express
 
-function getReceiverSocketId(userId) {
-  return userSocketMap[userId];
+const userSocketMap = {}; // {userId: [socketId1, socketId2]}
+
+export function getReceiverSocketId(userId) {
+  return userSocketMap[userId]; // now returns an array of socket ids
 }
 
-//online users map ={userId:socketId} userid 123:456socket mapping between them to link them
-const userSocketMap = {};
 io.on("connection", (socket) => {
-  const userId = socket.handshake.query.userId; // from frimtrend
+  console.log("A user connected", socket.id);
+
+  const userId = socket.handshake.query.userId;
   if (userId) {
-    userSocketMap[userId] = socket.id;
+    if (!userSocketMap[userId]) userSocketMap[userId] = [];
+    userSocketMap[userId].push(socket.id);
   }
 
+  // io.emit() is used to send events to all the connected clients
   io.emit("getOnlineUsers", Object.keys(userSocketMap));
-  //listen for events
+
   socket.on("disconnect", () => {
-    if (userId) {
-      delete userSocketMap[userId];
-      io.emit("getOnlineUsers", Object.keys(userSocketMap));
+    console.log("A user disconnected", socket.id);
+    if (userId && userSocketMap[userId]) {
+      userSocketMap[userId] = userSocketMap[userId].filter(id => id !== socket.id);
+      if (userSocketMap[userId].length === 0) {
+        delete userSocketMap[userId];
+      }
     }
+    io.emit("getOnlineUsers", Object.keys(userSocketMap));
   });
 });
 

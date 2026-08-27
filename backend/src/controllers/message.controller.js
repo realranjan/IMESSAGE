@@ -139,11 +139,13 @@ export async function sendMessage(req, res) {
     
     //to view the message whch was created we jave to rfresh it hence we will impleent it using socket io relatime talking mesaging here
     //
-    const receiverSocketId = getReceiverSocketId(receiverId);
+    const receiverSocketIds = getReceiverSocketId(receiverId);
     
     //only send data if user is online
-    if (receiverSocketId) {
-      io.to(receiverSocketId).emit("newMessage", newMessage);
+    if (receiverSocketIds && receiverSocketIds.length > 0) {
+      receiverSocketIds.forEach(socketId => {
+        io.to(socketId).emit("newMessage", newMessage);
+      });
     }
     
     res.status(201).json(newMessage);
