@@ -1,7 +1,9 @@
-import Imagekit, { toFile } from "@imagekit/nodejs";
+import ImageKit from "@imagekit/nodejs";
 
-const imagekit = new Imagekit({
-  privateKey: process.env["IMAGEKIT_KEY"],
+const imagekit = new ImageKit({
+  publicKey: process.env.IMAGEKIT_PUBLIC_KEY || "public_dummy",
+  privateKey: process.env.IMAGEKIT_KEY,
+  urlEndpoint: process.env.IMAGEKIT_URL_ENDPOINT || "https://ik.imagekit.io/dummy",
 });
 
 function hasImageKitConfig() {
@@ -9,18 +11,20 @@ function hasImageKitConfig() {
 }
 // renameing of files
 function createFileName(originalName = "upload") {
-  const safeName = originalName.replace(/[^a-zA_Z0-9._-]/g, "_");
+  const safeName = originalName.replace(/[^a-zA-Z0-9._-]/g, "_");
   return `chat-${Date.now()}-${safeName}`;
 }
 
 async function uploadChatMedia(file) {
-  const fileName = createFileName(file.originalName);
+  const fileName = createFileName(file.originalname);
 
-  const result = await imagekit.files.upload({
-    file: await toFile(file.Buffer, fileName, { type: file.mimetype }),
+  const result = await imagekit.upload({
+    file: file.buffer,
     fileName,
     folder: "/chat",
   });
+  
+  // If the user hasn't provided the exact urlEndpoint, we need to correct the URL if possible, but ImageKit returns result.url
   return result.url;
 }
 
