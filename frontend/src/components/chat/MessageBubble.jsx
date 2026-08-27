@@ -27,7 +27,7 @@ export function MessageBubble({ message }) {
         ) : null}
         {hasVideo ? <MessageVideo src={message.videoUrl} /> : null}
         {message.text ? (
-          <p className="whitespace-pre-wrap wrap-break-word">{message.text}</p>
+          <p className="whitespace-pre-wrap break-words">{message.text}</p>
         ) : null}
         <p
           className={`mt-1 text-[11px] tabular-nums ${

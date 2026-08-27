@@ -88,12 +88,13 @@ export const useChatStore = create(
 
         socket.off("newMessage");
         socket.on("newMessage", (newMessage) => {
+          // ALWAYS update the sidebar conversations to bump the sender to the top
+          get().getConversations();
+
           // if im not the receiver don't do anything just return
           if (String(newMessage.senderId) !== String(userId)) return;
 
           set({ messages: [...get().messages, newMessage] });
-
-          get().getConversations();
         });
       },
 
