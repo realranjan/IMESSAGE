@@ -41,6 +41,15 @@ export async function getConversationsForSidebar(req, res) {
             ],
           },
           lastMessageAt: { $max: "$createdAt" },
+          unreadCount: { 
+            $sum: { 
+              $cond: [
+                { $and: [{ $eq: ["$receiverId", loggedInUserId] }, { $eq: ["$isRead", false] }] }, 
+                1, 
+                0
+              ] 
+            } 
+          }
         },
       },
       //3.put the most recent messages on top .
@@ -54,9 +63,15 @@ export async function getConversationsForSidebar(req, res) {
           as: "user",
         },
       },
-      //5.pull that profile make it document from array
-      { $replaceRoot: { newRoot: { $first: "$user" } } },
-      //6.hode the private clerkid from result
+      //5.pull that profile make it document from array and merge unreadCount
+      { 
+        $replaceRoot: { 
+          newRoot: { 
+            $mergeObjects: [{ $first: "$user" }, { unreadCount: "$unreadCount" }] 
+          } 
+        } 
+      },
+      //6.hide the private clerkid from result
       { $project: { clerkId: 0 } },
     ]);
 
@@ -134,6 +149,23 @@ export async function sendMessage(req, res) {
     res.status(201).json(newMessage);
   } catch (error) {
     console.error("Error in sendMessage", error);
+    res.status(500).json({ message: "Internal server error", error: error.message });
+  }
+}
+
+export async function markMessagesAsRead(req, res) {
+  try {
+    const { id: senderId } = req.params;
+    const myId = req.user._id;
+
+    await Message.updateMany(
+      { senderId: senderId, receiverId: myId, isRead: false },
+      { $set: { isRead: true } }
+    );
+
+    res.status(200).json({ message: "Messages marked as read" });
+  } catch (error) {
+    console.error("Error in markMessagesAsRead", error);
     res.status(500).json({ message: "Internal server error", error: error.message });
   }
 }

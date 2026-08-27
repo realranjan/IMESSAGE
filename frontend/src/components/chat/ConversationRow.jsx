@@ -2,6 +2,7 @@ import { Avatar } from "@heroui/react";
 import { AvatarWithOnlineIndicator } from "./AvatarWithOnlineIndicator";
 
 export function ConversationRow({ user, selected, onSelect }) {
+  const hasUnread = user.unreadCount > 0;
   return (
     <button
       type="button"
@@ -18,8 +19,14 @@ export function ConversationRow({ user, selected, onSelect }) {
       </AvatarWithOnlineIndicator>
 
       <div className="min-w-0 flex-1">
-        <p className="truncate text-[15px] font-semibold">{user.name}</p>
+        <p className={`truncate text-[15px] ${hasUnread ? "font-bold text-foreground" : "font-semibold"}`}>{user.name}</p>
       </div>
+
+      {hasUnread && (
+        <div className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-bold text-primary-foreground">
+          {user.unreadCount}
+        </div>
+      )}
     </button>
   );
 }

@@ -28,6 +28,15 @@ async function test() {
               ],
             },
             lastMessageAt: { $max: "$createdAt" },
+            unreadCount: { 
+              $sum: { 
+                $cond: [
+                  { $and: [{ $eq: ["$receiverId", loggedInUserId] }, { $eq: ["$isRead", false] }] }, 
+                  1, 
+                  0
+                ] 
+              } 
+            }
           },
         },
         //3.put the most recent messages on top .

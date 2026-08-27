@@ -65,6 +65,21 @@ export const useChatStore = create(
         }
       },
 
+      markMessagesAsRead: async (userId) => {
+        if (!userId) return;
+        try {
+          await axiosInstance.post(`/messages/read/${userId}`);
+          // Optimistically clear unread count in conversations state
+          set((state) => ({
+            conversations: state.conversations.map(c => 
+              c._id === userId ? { ...c, unreadCount: 0 } : c
+            )
+          }));
+        } catch (error) {
+          console.error("Error marking messages as read", error);
+        }
+      },
+
       sendMessage: async (messageData) => {
         const { selectedUser, messages } = get();
         if (!selectedUser) return false;
@@ -88,6 +103,13 @@ export const useChatStore = create(
 
         socket.off("newMessage");
         socket.on("newMessage", (newMessage) => {
+          // Play sound notification if enabled
+          const { isSoundEnabled } = get();
+          if (isSoundEnabled) {
+            const audio = new window.Audio("/sounds/newmessage.mp3");
+            audio.play().catch(console.error);
+          }
+
           // ALWAYS update the sidebar conversations to bump the sender to the top
           get().getConversations();
 
@@ -95,6 +117,9 @@ export const useChatStore = create(
           if (String(newMessage.senderId) !== String(userId)) return;
 
           set({ messages: [...get().messages, newMessage] });
+          
+          // Since we are actively in this chat, mark message as read
+          get().markMessagesAsRead(userId);
         });
       },
 
@@ -114,6 +139,9 @@ export const useChatStore = create(
             null,
           messages: activeConversationId ? state.messages : [],
         }));
+        if (activeConversationId) {
+          get().markMessagesAsRead(activeConversationId);
+        }
       },
 
       setSearchQuery: (searchQuery) => set({ searchQuery }),
